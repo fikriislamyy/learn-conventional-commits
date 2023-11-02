@@ -25,6 +25,25 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	var existingEmailUser models.User
+	emailErr := initializers.DB.Where("email = ?", body.Email).First(&existingEmailUser).Error
+	if emailErr == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Email already in use",
+		})
+		return
+	}
+
+	var existingPhoneUser models.User
+	phoneErr := initializers.DB.Where("phone = ?", body.Phone).First(&existingPhoneUser).Error
+	if phoneErr == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Phone already in use",
+		})
+		return
+	}
+
+
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
